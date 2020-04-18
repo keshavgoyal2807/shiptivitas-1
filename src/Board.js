@@ -56,6 +56,40 @@ export default class Board extends React.Component {
     );
   }
 
+
+  // Adding Dragula features
+
+  componentDidMount(){
+    console.log(this.swimlanes.backlog.current)
+
+    const backlogcont = this.swimlanes.backlog.current;
+    const inprogresscont = this.swimlanes.inProgress.current;
+    const completecont = this.swimlanes.complete.current;
+
+    var clients = this.getClients()
+    console.log(clients)
+    
+    var drake = Dragula([backlogcont,inprogresscont,completecont])
+    drake.on('out',function(e1,target,source){
+      if(target === completecont)
+      {
+        e1.attributes.class.nodeValue = "Card Card-green"
+      }
+      else if(target === backlogcont)
+      {
+        e1.attributes.class.nodeValue = "Card Card-grey"
+      }
+      else if(target === inprogresscont)
+      {
+        e1.attributes.class.nodeValue = "Card Card-blue"
+      }
+      // updateState();
+    })
+  }
+
+
+
+
   render() {
     return (
       <div className="Board">
