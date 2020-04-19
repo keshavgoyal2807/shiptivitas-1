@@ -1,5 +1,5 @@
 import React from 'react';
-import Dragula from 'dragula';
+import Dragula from 'react-dragula';
 import 'dragula/dist/dragula.css';
 import Swimlane from './Swimlane';
 import './Board.css';
@@ -69,24 +69,74 @@ export default class Board extends React.Component {
     var clients = this.getClients()
     console.log(clients)
     
-    var drake = Dragula([backlogcont,inprogresscont,completecont])
-    drake.on('out',function(e1,target,source){
-      if(target === completecont)
-      {
-        e1.attributes.class.nodeValue = "Card Card-green"
-      }
-      else if(target === backlogcont)
-      {
-        e1.attributes.class.nodeValue = "Card Card-grey"
-      }
-      else if(target === inprogresscont)
-      {
-        e1.attributes.class.nodeValue = "Card Card-blue"
-      }
+    this.drake = Dragula([backlogcont,inprogresscont,completecont])
+    this.drake.on('drop',(el,target,source,sibiling)=>{
+      console.log(this)
+      this.updateState(el,target,source);
+
+      // if(target === completecont)
+      // {
+      //   e1.attributes.class.nodeValue = "Card Card-green"
+      // }
+      // else if(target === backlogcont)
+      // {
+      //   e1.attributes.class.nodeValue = "Card Card-grey"
+      // }
+      // else if(target === inprogresscont)
+      // {
+      //   e1.attributes.class.nodeValue = "Card Card-blue"
+      // }
       // updateState();
     })
   }
-
+  updateState=(el,target,source)=>{
+    // console.log(el.dataset)
+    this.drake.cancel(true)
+      var clientsList = [
+        ...this.state.clients.backlog,
+        ...this.state.clients.inProgress,
+        ...this.state.clients.complete
+      ]
+      // const changedCard = clientsList.filter((client)=>{
+      //   // console.log(typeof(client.id))
+      //   // console.log(typeof(el.dataset.id))
+      //   if(client.id === el.dataset.id)
+      //   {
+      //     return client;
+      //   }
+      // })
+      console.log(source)
+      var lane = 'backlog'
+      if(target === this.swimlanes.inProgress.current)
+      {
+        lane = 'in-progress'
+      }
+      else if(target === this.swimlanes.complete.current)
+      {
+        lane = 'complete'
+      }
+      console.log(lane)
+      clientsList = clientsList.map((client)=>{
+        if(client.id === el.dataset.id)
+        {
+          return {
+            ...client,
+            status:lane
+          }
+        }
+        else{
+          return client
+        }
+      })
+      console.log(clientsList)
+      this.setState({
+        clients: {
+          backlog: clientsList.filter(client => !client.status || client.status === 'backlog'),
+          inProgress: clientsList.filter(client => client.status && client.status === 'in-progress'),
+          complete: clientsList.filter(client => client.status && client.status === 'complete'),
+        }
+      })
+  }
 
 
 
